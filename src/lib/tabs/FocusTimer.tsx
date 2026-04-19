@@ -7,7 +7,8 @@ import {
   Plus,
   Play, 
   Square, 
-  RotateCcw, 
+  RotateCcw,
+  RefreshCw,
   AlertTriangle, 
   Zap, 
   Shield, 
@@ -20,18 +21,58 @@ import {
 import { cn } from "../utils";
 
 export default function FocusTimer() {
-  const { stats, completeFocusSession, triggerAchievement, customBackground } = useSYNK();
+  const { stats, completeFocusSession, triggerAchievement, syncProfileData } = useSYNK();
   const { activeConfig } = useFandom();
 
+  const linkedMember = activeConfig.members.find(m => m.id === syncProfileData.linkedMemberId) || activeConfig.members[0];
+  const idolName = linkedMember?.name || "Your Idol";
+
+  // State managed by localStorage for persistence
+  const [targetEndTime, setTargetEndTime] = useState<number | null>(() => {
+    const saved = localStorage.getItem("SYNK_FOCUS_END_TIME");
+    return saved ? parseInt(saved) : null;
+  });
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(() => {
+    const saved = localStorage.getItem("SYNK_FOCUS_START_TIME");
+    return saved ? parseInt(saved) : null;
+  });
+  const [initialDuration, setInitialDuration] = useState<number | null>(() => {
+    const saved = localStorage.getItem("SYNK_FOCUS_INITIAL_DURATION");
+    return saved ? parseInt(saved) : null;
+  });
+  const [isActive, setIsActive] = useState<boolean>(() => {
+    return localStorage.getItem("SYNK_FOCUS_ACTIVE") === "true";
+  });
+
   const [timeLeft, setTimeLeft] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [duration, setDuration] = useState(25); // minutes
+  const [duration, setDuration] = useState(25); // Set minutes
   const [failed, setFailed] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const initialTimeRef = useRef(0);
+  const [isSyncing, setIsSyncing] = useState(false);
+  
+  const lastActiveRef = useRef<number>(Date.now());
   const wakeLockRef = useRef<any>(null);
 
-  // Request Wake Lock to prevent screen from sleeping
+  // Persistence Sync
+  useEffect(() => {
+    if (targetEndTime) localStorage.setItem("SYNK_FOCUS_END_TIME", targetEndTime.toString());
+    else localStorage.removeItem("SYNK_FOCUS_END_TIME");
+  }, [targetEndTime]);
+
+  useEffect(() => {
+    if (sessionStartTime) localStorage.setItem("SYNK_FOCUS_START_TIME", sessionStartTime.toString());
+    else localStorage.removeItem("SYNK_FOCUS_START_TIME");
+  }, [sessionStartTime]);
+
+  useEffect(() => {
+    if (initialDuration) localStorage.setItem("SYNK_FOCUS_INITIAL_DURATION", initialDuration.toString());
+    else localStorage.removeItem("SYNK_FOCUS_INITIAL_DURATION");
+  }, [initialDuration]);
+
+  useEffect(() => {
+    localStorage.setItem("SYNK_FOCUS_ACTIVE", isActive.toString());
+  }, [isActive]);
+
+  // Request Wake Lock
   const requestWakeLock = async () => {
     try {
       if ('wakeLock' in navigator) {
@@ -49,11 +90,61 @@ export default function FocusTimer() {
     }
   };
 
-  // Cheat Detection
+  // Main Timer Logic: Spatio-Temporal Sync
+  useEffect(() => {
+    if (!isActive || !targetEndTime) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((targetEndTime - now) / 1000));
+      
+      // The Forest Rule: Check for abnormal gaps (Cheat Detection)
+      // If we're here, the tab is visible or throttled. 
+      // If the gap since lastActive is too large, it means the app was likely backgrounded.
+      const gap = now - lastActiveRef.current;
+      
+      // If gap is more than 25 seconds (allowing for minor throttle/jitter)
+      // Note: Visibility API also handles this, but this is a secondary guard.
+      if (gap > 25000) {
+         handleFail("SYNC_LOSS: DETECTED_EXTERNAL_JUMP");
+      }
+
+      lastActiveRef.current = now;
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        handleComplete();
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isActive, targetEndTime]);
+
+  // Visibility Guard (The Forest Rule)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden && isActive) {
-        handleFail();
+      if (document.hidden) {
+        // App backgrounded
+        lastActiveRef.current = Date.now();
+      } else if (!document.hidden && isActive) {
+        // App returned to foreground
+        const now = Date.now();
+        const gap = now - lastActiveRef.current;
+
+        // Strict 20s check
+        if (gap > 20000) {
+          handleFail("連線中斷：檢測到超時背景切換");
+        } else {
+          setIsSyncing(true);
+          setTimeout(() => setIsSyncing(false), 1500);
+          
+          // Recalculate remaining time
+          if (targetEndTime) {
+            const remaining = Math.max(0, Math.floor((targetEndTime - now) / 1000));
+            setTimeLeft(remaining);
+          }
+        }
+        lastActiveRef.current = now;
       }
     };
 
@@ -61,16 +152,22 @@ export default function FocusTimer() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isActive]);
+  }, [isActive, targetEndTime]);
 
   const handleStart = async () => {
     const seconds = duration * 60;
+    const now = Date.now();
+    const end = now + (seconds * 1000);
+    
+    setTargetEndTime(end);
+    setSessionStartTime(now);
+    setInitialDuration(duration);
     setTimeLeft(seconds);
-    initialTimeRef.current = seconds;
     setIsActive(true);
     setFailed(false);
+    lastActiveRef.current = now;
     
-    // Immersive Mode
+    // Immersive Mode & Wake Lock
     await requestWakeLock();
     try {
       if (document.documentElement.requestFullscreen) {
@@ -81,73 +178,63 @@ export default function FocusTimer() {
     }
   };
 
-  const cleanupImmersive = async () => {
+  const cleanupSession = async () => {
     await releaseWakeLock();
+    setIsActive(false);
+    setTargetEndTime(null);
+    setSessionStartTime(null);
+    setInitialDuration(null);
     if (document.fullscreenElement) {
-      try {
-        await document.exitFullscreen();
-      } catch (e) {}
+      try { await document.exitFullscreen(); } catch (e) {}
     }
   };
 
   const handleStop = async () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setIsActive(false);
+    await cleanupSession();
     setTimeLeft(0);
-    await cleanupImmersive();
   };
 
-  const handleFail = async () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setIsActive(false);
+  const handleFail = async (reason?: string) => {
+    await cleanupSession();
     setTimeLeft(0);
     setFailed(true);
-    await cleanupImmersive();
-    triggerAchievement("同步中斷", "檢測到外部干擾，連線已失敗");
+    triggerAchievement("同步中斷", reason || "檢測到外部干擾");
   };
 
   const handleComplete = async () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setIsActive(false);
-    completeFocusSession(duration);
+    const dur = initialDuration || duration;
+    await cleanupSession();
+    completeFocusSession(dur);
     setTimeLeft(0);
-    await cleanupImmersive();
+    triggerAchievement("同步成功", "共鳴連結已達成");
   };
 
-  useEffect(() => {
-    if (isActive && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && isActive) {
-      handleComplete();
-    }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isActive, timeLeft]);
-
+  // UI Calculations
   const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    }
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const progress = timeLeft > 0 ? (timeLeft / (duration * 60)) * 100 : 0;
+  const totalPossibleSeconds = (initialDuration || duration) * 60;
+  const elapsedPercentage = timeLeft > 0 ? (100 - (timeLeft / totalPossibleSeconds) * 100) : 100;
+  // SVG Progress calculation (radius 160 -> circumference ~1005)
+  const circumference = 1005;
+  const dashOffset = circumference - (elapsedPercentage / 100) * circumference;
 
-  // Multiplier Progress Logic
   const getNextTier = (streak: number) => {
     if (streak < 3) return 3;
     if (streak < 7) return 7;
     if (streak < 14) return 14;
-    if (streak < 21) return 21;
-    if (streak < 28) return 28;
     return 30;
   };
 
   const nextTier = getNextTier(stats.currentStreak);
-  const prevTier = stats.currentStreak >= 28 ? 28 : (stats.currentStreak >= 21 ? 21 : (stats.currentStreak >= 14 ? 14 : (stats.currentStreak >= 7 ? 7 : (stats.currentStreak >= 3 ? 3 : 0))));
+  const prevTier = stats.currentStreak >= 14 ? 14 : (stats.currentStreak >= 7 ? 7 : (stats.currentStreak >= 3 ? 3 : 0));
   const resonanceProgress = ((stats.currentStreak - prevTier) / (nextTier - prevTier)) * 100;
 
   return (
@@ -382,7 +469,22 @@ export default function FocusTimer() {
                        <Lock className="w-4 h-4 text-purple-400 fill-purple-400/20" />
                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400">Zen Lock Active</span>
                     </div>
-                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">Deep Resonance Protocol</h2>
+                    <div className="flex flex-col gap-1 items-center">
+                       <h2 className="text-xl font-black text-white uppercase tracking-tighter">Deep Resonance Protocol</h2>
+                       <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mt-1">
+                          {idolName} is accompanying you in this frequency...
+                       </p>
+                       <motion.div 
+                          animate={{ opacity: [0.3, 1, 0.3] }} 
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="flex items-center gap-2"
+                       >
+                          <Zap className="w-3 h-3 text-purple-400 fill-current" />
+                          <span className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.3em]">
+                            Multiplier Active: {(stats.activeMultiplier || 1.0).toFixed(1)}x
+                          </span>
+                       </motion.div>
+                    </div>
                   </div>
 
                   <div className="relative">
@@ -394,23 +496,24 @@ export default function FocusTimer() {
                       <motion.circle
                         cx="170" cy="170" r="160"
                         className="fill-none stroke-purple-500 stroke-[4px]"
-                        strokeDasharray="1005"
-                        animate={{ strokeDashoffset: 1005 - (1005 * progress) / 100 }}
+                        strokeDasharray={circumference}
+                        animate={{ strokeDashoffset: dashOffset }}
                         transition={{ duration: 1, ease: "linear" }}
                         strokeLinecap="round"
-                        filter="drop-shadow(0 0 8px rgba(168,85,247,0.5))"
+                        filter="drop-shadow(0 0 10px rgba(168,85,247,0.8))"
                       />
                     </svg>
                     
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <motion.span 
-                        key={timeLeft}
-                        initial={{ opacity: 0.8, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-8xl font-black tracking-tighter text-white font-mono"
+                      <motion.div
+                        animate={{ scale: [1, 1.02, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="flex flex-col items-center"
                       >
-                        {formatTime(timeLeft)}
-                      </motion.span>
+                        <span className="text-8xl font-black tracking-tighter text-white font-mono leading-none">
+                          {formatTime(timeLeft)}
+                        </span>
+                      </motion.div>
                       <div className="flex items-center gap-3 mt-6">
                         <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
                         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500">
@@ -437,6 +540,24 @@ export default function FocusTimer() {
                     </button>
                   </div>
                 </motion.div>
+
+                {/* Resonating Update Overlay (For when returning to app) */}
+                <AnimatePresence>
+                  {isSyncing && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 z-[300] bg-zinc-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4"
+                    >
+                      <div className="flex items-center gap-3">
+                         <RefreshCw className="w-5 h-5 text-purple-500 animate-spin" />
+                         <span className="text-[12px] font-black uppercase tracking-[0.4em] text-white">Archives Synchronizing</span>
+                      </div>
+                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Recalculating resonance drift...</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Corner Accents */}
                 <div className="absolute top-10 left-10 w-12 h-12 border-t-[1px] border-l-[1px] border-white/10" />
