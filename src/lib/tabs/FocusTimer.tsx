@@ -12,6 +12,8 @@ import {
   Zap, 
   Shield, 
   Flame, 
+  Lock,
+  Unlock,
   Timer as TimerIcon,
   Sparkles
 } from "lucide-react";
@@ -27,6 +29,25 @@ export default function FocusTimer() {
   const [failed, setFailed] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const initialTimeRef = useRef(0);
+  const wakeLockRef = useRef<any>(null);
+
+  // Request Wake Lock to prevent screen from sleeping
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+      }
+    } catch (err) {
+      console.warn("Screen Wake Lock failed:", err);
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    if (wakeLockRef.current) {
+      await wakeLockRef.current.release();
+      wakeLockRef.current = null;
+    }
+  };
 
   // Cheat Detection
   useEffect(() => {
@@ -42,33 +63,55 @@ export default function FocusTimer() {
     };
   }, [isActive]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     const seconds = duration * 60;
     setTimeLeft(seconds);
     initialTimeRef.current = seconds;
     setIsActive(true);
     setFailed(false);
+    
+    // Immersive Mode
+    await requestWakeLock();
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn("Fullscreen request denied");
+    }
   };
 
-  const handleStop = () => {
+  const cleanupImmersive = async () => {
+    await releaseWakeLock();
+    if (document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch (e) {}
+    }
+  };
+
+  const handleStop = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsActive(false);
     setTimeLeft(0);
+    await cleanupImmersive();
   };
 
-  const handleFail = () => {
+  const handleFail = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsActive(false);
     setTimeLeft(0);
     setFailed(true);
+    await cleanupImmersive();
     triggerAchievement("同步中斷", "檢測到外部干擾，連線已失敗");
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsActive(false);
     completeFocusSession(duration);
     setTimeLeft(0);
+    await cleanupImmersive();
   };
 
   useEffect(() => {
@@ -316,50 +359,90 @@ export default function FocusTimer() {
             ) : (
               <motion.div 
                 key="active"
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex flex-col items-center gap-20 w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[200] bg-zinc-950 flex flex-col items-center justify-center p-8 overflow-hidden touch-none"
               >
-                <div className="relative">
-                  <svg className="w-[340px] h-[340px] -rotate-90">
-                    <circle
-                      cx="170" cy="170" r="160"
-                      className="fill-none stroke-zinc-50 stroke-[6px]"
-                    />
-                    <motion.circle
-                      cx="170" cy="170" r="160"
-                      className="fill-none stroke-purple-600 stroke-[6px]"
-                      strokeDasharray="1005"
-                      animate={{ strokeDashoffset: 1005 - (1005 * progress) / 100 }}
-                      transition={{ duration: 1, ease: "linear" }}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-8xl font-black tracking-tighter text-zinc-900 font-mono">
-                      {formatTime(timeLeft)}
-                    </span>
-                    <div className="flex items-center gap-3 mt-4">
-                      <div className="w-2 h-2 rounded-full bg-purple-600 animate-ping" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.4em] text-purple-600">
-                        RESONATING
-                      </span>
+                {/* Immersive Background Grid */}
+                <div className="absolute inset-0 opacity-20 pointer-events-none" 
+                  style={{ 
+                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)`,
+                    backgroundSize: '40px 40px' 
+                  }} 
+                />
+
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="relative flex flex-col items-center gap-16 w-full max-w-md z-10"
+                >
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="flex items-center gap-2 mb-2">
+                       <Lock className="w-4 h-4 text-purple-400 fill-purple-400/20" />
+                       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400">Zen Lock Active</span>
+                    </div>
+                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">Deep Resonance Protocol</h2>
+                  </div>
+
+                  <div className="relative">
+                    <svg className="w-[340px] h-[340px] -rotate-90">
+                      <circle
+                        cx="170" cy="170" r="160"
+                        className="fill-none stroke-white/5 stroke-[4px]"
+                      />
+                      <motion.circle
+                        cx="170" cy="170" r="160"
+                        className="fill-none stroke-purple-500 stroke-[4px]"
+                        strokeDasharray="1005"
+                        animate={{ strokeDashoffset: 1005 - (1005 * progress) / 100 }}
+                        transition={{ duration: 1, ease: "linear" }}
+                        strokeLinecap="round"
+                        filter="drop-shadow(0 0 8px rgba(168,85,247,0.5))"
+                      />
+                    </svg>
+                    
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <motion.span 
+                        key={timeLeft}
+                        initial={{ opacity: 0.8, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-8xl font-black tracking-tighter text-white font-mono"
+                      >
+                        {formatTime(timeLeft)}
+                      </motion.span>
+                      <div className="flex items-center gap-3 mt-6">
+                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500">
+                          RESONATING
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col items-center gap-6">
-                  <button
-                    onClick={handleStop}
-                    className="group px-12 py-5 bg-white border border-zinc-100 text-zinc-400 text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:border-red-200 hover:text-red-500 transition-all flex items-center justify-center gap-3 shadow-sm"
-                  >
-                    <Square className="w-4 h-4 fill-current transition-transform group-hover:scale-110" />
-                    ABORT PROTOCOL
-                  </button>
-                  <p className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">DETECTION: EXTERNAL APP VISIBILITY = FAIL</p>
-                </div>
+                  <div className="flex flex-col items-center gap-8 w-full">
+                    <div className="flex flex-col items-center gap-2">
+                       <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest text-center max-w-[240px] leading-relaxed">
+                          DEVICE SLEEP SUPPRESSED. <br/>
+                          APPLICATION VISIBILITY MONITORING ACTIVE.
+                       </p>
+                    </div>
+
+                    <button
+                      onClick={handleStop}
+                      className="group px-12 py-5 bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-black uppercase tracking-[0.4em] rounded-full hover:bg-red-900/20 hover:text-red-400 hover:border-red-500/30 transition-all flex items-center justify-center gap-3 active:scale-95"
+                    >
+                      <Unlock className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      Abort Sync
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* Corner Accents */}
+                <div className="absolute top-10 left-10 w-12 h-12 border-t-[1px] border-l-[1px] border-white/10" />
+                <div className="absolute top-10 right-10 w-12 h-12 border-t-[1px] border-r-[1px] border-white/10" />
+                <div className="absolute bottom-10 left-10 w-12 h-12 border-b-[1px] border-l-[1px] border-white/10" />
+                <div className="absolute bottom-10 right-10 w-12 h-12 border-b-[1px] border-r-[1px] border-white/10" />
               </motion.div>
             )}
           </AnimatePresence>
