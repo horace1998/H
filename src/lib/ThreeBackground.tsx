@@ -134,5 +134,5 @@ export default function ThreeBackground({ completionRate, showCore = true }: { c
     };
   }, [completionRate, showCore]);
 
-  return <div ref={containerRef} className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[24px]" />;
+  return <div ref={containerRef} className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[120px]" />;
 }

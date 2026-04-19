@@ -443,14 +443,14 @@ function DirectiveCard({
   key?: string
 }) {
   const swipeX = useMotionValue(0);
-  const swipeBg = useTransform(swipeX, [-80, 0], ["rgba(34, 197, 94, 0.1)", "rgba(0,0,0,0)"]);
-  const successOpacity = useTransform(swipeX, [-80, -20], [1, 0]);
-  const iconScale = useTransform(swipeX, [-60, 0], [1.2, 0.5]);
-  const iconRotate = useTransform(swipeX, [-100, 0], [0, -45]);
-  const hintOpacity = useTransform(swipeX, [-40, 0], [0, 1]);
+  const swipeBg = useTransform(swipeX, [0, 80], ["rgba(0,0,0,0)", "rgba(34, 197, 94, 0.1)"]);
+  const successOpacity = useTransform(swipeX, [20, 80], [0, 1]);
+  const iconScale = useTransform(swipeX, [0, 60], [0.5, 1.2]);
+  const iconRotate = useTransform(swipeX, [0, 80], [-45, 0]);
+  const hintOpacity = useMotionValue(0); // Effectively hidden
 
   const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.x < -80 && !goal.completed) {
+    if (info.offset.x > 80 && !goal.completed) {
       onComplete();
     }
     swipeX.set(0);
@@ -473,7 +473,7 @@ function DirectiveCard({
       <motion.div 
         style={{ x: swipeX, backgroundColor: swipeBg }}
         drag={goal.completed ? false : "x"}
-        dragConstraints={{ left: -120, right: 0 }}
+        dragConstraints={{ left: 0, right: 120 }}
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
         className={cn(
@@ -554,12 +554,12 @@ function DirectiveCard({
       {/* Swipe Success Background */}
       <motion.div 
         style={{ opacity: successOpacity }}
-        className="absolute inset-y-0 right-0 w-full bg-green-50/50 flex items-center justify-end px-6 pointer-events-none"
+        className="absolute inset-y-0 left-0 w-full bg-green-50/50 flex items-center justify-start px-6 pointer-events-none"
       >
-         <span className="text-[8px] font-black text-green-600 uppercase tracking-[0.3em] mr-2">&lt;&lt; {t.common.done}</span>
          <motion.div style={{ scale: iconScale, rotate: iconRotate }}>
            <Check className="w-4 h-4 text-green-600" />
          </motion.div>
+         <span className="text-[8px] font-black text-green-600 uppercase tracking-[0.3em] ml-2">{t.common.done} &gt;&gt;</span>
       </motion.div>
     </div>
   );
@@ -626,7 +626,7 @@ function TaskCreateModal({
               <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest px-1">PROTOCOL_TYPE</span>
               <select value={draftTaskType} onChange={(e) => setDraftTaskType(e.target.value as GoalType)} className="bg-zinc-50 border border-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 rounded-xl focus:outline-none">
                 <option value="pulse">pulse // small-scale</option>
-                <option value="orbit" selected>orbit // recurring</option>
+                <option value="orbit">orbit // recurring</option>
                 <option value="galaxy">galaxy // expansion</option>
               </select>
             </div>
@@ -644,9 +644,20 @@ function TaskCreateModal({
             <input type="time" step={1} value={draftTaskTime} onChange={(e) => setDraftTaskTime(e.target.value.length === 5 ? `${e.target.value}:00` : e.target.value)} className="bg-zinc-50 border border-zinc-100 px-3 py-2 text-xs text-zinc-600 rounded-xl" />
           </div>
         </div>
-        <div className="flex justify-end gap-3 pt-4">
-          <button type="button" onClick={onCancel} className="px-6 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400">{t.common.cancel}</button>
-          <button type="submit" className="minimal-button">{activeConfig.terminology.actionButton}</button>
+        <div className="flex items-center gap-3 pt-4">
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="flex-1 py-4 bg-white border-2 border-zinc-900 text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-50 transition-all active:scale-95"
+          >
+            {t.common.cancel}
+          </button>
+          <button 
+            type="submit" 
+            className="flex-1 py-4 bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-800 transition-all active:scale-95"
+          >
+            {activeConfig.terminology.actionButton}
+          </button>
         </div>
       </form>
     </motion.div>
@@ -696,9 +707,19 @@ function ProofModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (pro
             {kind === "image" ? <img src={preview} className="w-full h-full object-cover" /> : <video src={preview} controls className="w-full h-full object-cover" />}
           </div>
         )}
-        <div className="mt-8 flex justify-end gap-3">
-          <button onClick={onClose} className="px-6 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400">Cancel</button>
-          <button onClick={() => onSubmit(preview ? { kind, name: fileName, url: preview } : undefined)} className="minimal-button">Save Sync</button>
+        <div className="mt-8 flex items-center gap-3">
+          <button 
+            onClick={onClose} 
+            className="flex-1 py-4 bg-white border-2 border-zinc-900 text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-50 transition-all active:scale-95"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={() => onSubmit(preview ? { kind, name: fileName, url: preview } : undefined)} 
+            className="flex-1 py-4 bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-800 transition-all active:scale-95 shadow-lg"
+          >
+            Save Sync
+          </button>
         </div>
       </motion.div>
     </motion.div>
@@ -731,11 +752,11 @@ function normalizeScheduleTime(value: unknown) {
   return "00:00:00";
 }
 
-function getLocalISODate() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset();
-  const local = new Date(now.getTime() - (offset * 60 * 1000));
-  return local.toISOString().slice(0, 10);
+function getLocalISODate(d = new Date()) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function getLocalTime() {
@@ -752,9 +773,15 @@ function normalizeTaskDate(value: unknown) {
   return todayISODate();
 }
 
+function parseISOToLocalDate(iso: string) {
+  const parts = iso.split('-');
+  if (parts.length !== 3) return new Date();
+  return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+}
+
 function isoForDisplayedDate(baseMonthDate: Date, day: number) {
   const d = new Date(baseMonthDate.getFullYear(), baseMonthDate.getMonth(), day);
-  return d.toISOString().slice(0, 10);
+  return getLocalISODate(d);
 }
 
 function occursOnDate(
@@ -765,14 +792,24 @@ function occursOnDate(
 ) {
   const base = normalizeTaskDate(dateById[goalId]);
   const recurrence = recurrenceById[goalId] ?? { type: "none", days: [] };
-  const dateISO = date.toISOString().slice(0, 10);
+  const dateISO = getLocalISODate(date);
+  
   if (recurrence.type === "none") {
     return base === dateISO;
   }
+  
+  const baseDate = parseISOToLocalDate(base);
+  
   if (recurrence.type === "weekly") {
-    const weekDays = recurrence.days.length ? recurrence.days : [new Date(base).getDay()];
+    const weekDays = recurrence.days.length ? recurrence.days : [baseDate.getDay()];
+    // Only occur if current date is today or in the future relative to start date
+    const dayDiff = Math.floor((date.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (dayDiff < 0) return false;
     return weekDays.includes(date.getDay());
   }
-  const monthDays = recurrence.days.length ? recurrence.days : [new Date(base).getDate()];
+  
+  const monthDays = recurrence.days.length ? recurrence.days : [baseDate.getDate()];
+  const dayDiff = Math.floor((date.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+  if (dayDiff < 0) return false;
   return monthDays.includes(date.getDate());
 }

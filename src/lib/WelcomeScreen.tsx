@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "motion/react";
 import React, { useEffect, useState } from "react";
-import { Fingerprint, Sparkles, Loader2, ChevronRight } from "lucide-react";
+import { Fingerprint, Sparkles, Loader2, ChevronRight, Globe } from "lucide-react";
 import { cn } from "./utils";
+import ThreeBackground from "./ThreeBackground";
 import { auth, db, OperationType, handleFirestoreError, signInAnonymously, GoogleAuthProvider, signInWithPopup } from "../firebase";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { useSYNK, MemberBias } from "./Store";
@@ -235,6 +236,31 @@ const WelcomeScreen: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =>
       className="fixed inset-0 z-50 flex flex-col bg-white text-zinc-900 overflow-hidden tracking-widest px-4 sm:px-6 md:px-8"
       style={{ '--primary-color': activeConfig.theme.primaryColor } as any}
     >
+      {/* Universe Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply overflow-hidden">
+        <ThreeBackground completionRate={currentQuestion / totalSteps} showCore={false} />
+      </div>
+
+      {/* Dynamic Member Layer */}
+      <AnimatePresence>
+        {answers.bias && (
+           <motion.div
+             key={answers.bias}
+             initial={{ opacity: 0, scale: 1.1 }}
+             animate={{ opacity: 0.7, scale: 1 }}
+             exit={{ opacity: 0 }}
+             transition={{ duration: 1.5 }}
+             className="absolute inset-0 pointer-events-none"
+           >
+              <img 
+                src={activeConfig.members.find(m => m.id === answers.bias)?.customImage || `https://picsum.photos/seed/${activeConfig.groupId + answers.bias}/800/800`}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+           </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Background elements - more subtle for light mode */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(0,0,0,0.03),transparent)] pointer-events-none" />
       <motion.div 

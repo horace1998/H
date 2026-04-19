@@ -229,8 +229,33 @@ export default function RitualDashboard() {
             </AnimatePresence>
           </div>
 
-          <div className="absolute inset-0 z-0 overflow-hidden opacity-50 contrast-[0.8] grayscale">
-            <ThreeBackground completionRate={completionRate} />
+          {/* Universe Background Layer */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <AnimatePresence mode="wait">
+              {activeConfig.members.find(m => m.id === bias) && (
+                <motion.div
+                  key={bias}
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 0.7, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 2 }}
+                  className="absolute inset-0"
+                >
+                  <img 
+                    src={activeConfig.members.find(m => m.id === bias)?.customImage || `https://picsum.photos/seed/${activeConfig.groupId + bias}/800/800`}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            <div className="absolute inset-0 opacity-60 contrast-125 mix-blend-soft-light">
+              <ThreeBackground completionRate={completionRate} />
+            </div>
+            
+            {/* Gradient Mask to keep it grounded */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/20 to-white/80" />
           </div>
           
           <div className="absolute top-6 left-6 z-20 pointer-events-none">
@@ -467,14 +492,14 @@ function CompactDirectiveRow({
   key?: string
 }) {
   const swipeX = useMotionValue(0);
-  const swipeBg = useTransform(swipeX, [-80, 0], ["rgba(34, 197, 94, 0.1)", "rgba(0,0,0,0)"]);
-  const successOpacity = useTransform(swipeX, [-20, -80], [0, 1]);
-  const iconScale = useTransform(swipeX, [0, -60], [0.5, 1.2]);
-  const iconRotate = useTransform(swipeX, [0, -80], [-45, 0]);
-  const hintOpacity = useTransform(swipeX, [0, -40], [1, 0]);
+  const swipeBg = useTransform(swipeX, [0, 80], ["rgba(0,0,0,0)", "rgba(34, 197, 94, 0.1)"]);
+  const successOpacity = useTransform(swipeX, [20, 80], [0, 1]);
+  const iconScale = useTransform(swipeX, [0, 60], [0.5, 1.2]);
+  const iconRotate = useTransform(swipeX, [0, 80], [-45, 0]);
+  const hintOpacity = useMotionValue(0);
 
   const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.x < -80 && !goal.completed) {
+    if (info.offset.x > 80 && !goal.completed) {
       onComplete();
     }
     swipeX.set(0);
@@ -490,7 +515,7 @@ function CompactDirectiveRow({
     <div className="relative overflow-hidden rounded-xl border border-zinc-50 shadow-sm">
       <motion.div
         drag={goal.completed ? false : "x"}
-        dragConstraints={{ left: -120, right: 0 }}
+        dragConstraints={{ left: 0, right: 120 }}
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
         style={{ x: swipeX, backgroundColor: swipeBg }}
@@ -538,12 +563,12 @@ function CompactDirectiveRow({
       {/* Swipe Success Background */}
       <motion.div 
         style={{ opacity: successOpacity }}
-        className="absolute inset-y-0 right-0 w-full bg-green-50/50 flex items-center justify-end px-4 pointer-events-none"
+        className="absolute inset-y-0 left-0 w-full bg-green-50/50 flex items-center justify-start px-4 pointer-events-none"
       >
-        <span className="text-[8px] font-black text-green-600 uppercase tracking-[0.3em] mr-2">&lt;&lt; {t.common.done}</span>
         <motion.div style={{ scale: iconScale, rotate: iconRotate }}>
           <Check className="w-4 h-4 text-green-600" />
         </motion.div>
+        <span className="text-[8px] font-black text-green-600 uppercase tracking-[0.3em] ml-2">{t.common.done} &gt;&gt;</span>
       </motion.div>
     </div>
   );

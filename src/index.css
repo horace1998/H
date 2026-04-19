@@ -1,1 +1,66 @@
 @import "tailwindcss";
+
+@theme {
+  --color-synk-bg: #FFFFFF;
+  --color-synk-foreground: #09090b;
+  --color-synk-border: #e4e4e7;
+  --color-synk-pink: #f472b6;
+  
+  @keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-synk-bg text-synk-foreground antialiased;
+  }
+}
+
+@layer components {
+  .minimal-button {
+    @apply text-white rounded-full transition-all font-bold;
+    background-color: var(--primary-color, black);
+  }
+  .minimal-button:hover {
+    filter: brightness(0.9);
+  }
+  
+  .nav-dot {
+    @apply w-1 h-1 rounded-full bg-black mr-1;
+  }
+
+  .minimal-card {
+    @apply bg-white border border-zinc-100 rounded-[40px] shadow-sm;
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 15px var(--primary-color), 0 0 5px var(--primary-color);
+  }
+
+  .neon-border {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+  }
+
+  .text-neon {
+    color: var(--primary-color);
+    text-shadow: 0 0 8px var(--primary-color);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 2px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e4e4e7;
+    border-radius: 10px;
+  }
+}
+
+.animate-loading-bar {
+  animation: loading-bar 1.5s infinite linear;
+}
