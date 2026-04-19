@@ -2,7 +2,7 @@ import { useSYNK } from "./Store";
 import { useFandom } from "./FandomContext";
 import { motion, AnimatePresence } from "motion/react";
 import { lazy, Suspense, useState } from "react";
-import { Home, Vault, Zap, Fingerprint, Gem } from "lucide-react";
+import { Home, Vault, Zap, Fingerprint, Gem, Database } from "lucide-react";
 import { cn } from "./utils";
 import { translations, Language } from "./translations";
 
@@ -11,15 +11,17 @@ const RitualDashboard = lazy(() => import("./tabs/RitualDashboard"));
 const GoalVault = lazy(() => import("./tabs/GoalVault"));
 const SynkOracle = lazy(() => import("./tabs/SynkOracle"));
 const IdentityCard = lazy(() => import("./tabs/IdentityCard"));
+const FandomRegistry = lazy(() => import("./tabs/FandomRegistry"));
 
 const TABS = (t: any, fandom: any) => [
   { id: "ritual", label: fandom.terminology.homeHeader || t.common.home, subLabel: "SYNK CENTER", icon: Home },
   { id: "vault", label: fandom.terminology.taskLabel || t.common.directives, subLabel: "COMMANDS", icon: Vault },
   { id: "oracle", label: fandom.terminology.galleryLabel || t.common.oracle, subLabel: "GALLERY", icon: Gem },
   { id: "identity", label: t.common.identity, subLabel: "IDENTITY", icon: Fingerprint },
+  { id: "registry", label: "Registry", subLabel: "DATABASE", icon: Database },
 ] as const;
 
-type TabId = "ritual" | "vault" | "oracle" | "identity";
+type TabId = "ritual" | "vault" | "oracle" | "identity" | "registry";
 
 export default function AppLayout() {
   const { stats, achievement, language } = useSYNK();
@@ -115,6 +117,7 @@ export default function AppLayout() {
                   {activeTab === "vault" && <GoalVault />}
                   {activeTab === "oracle" && <SynkOracle />}
                   {activeTab === "identity" && <IdentityCard />}
+                  {activeTab === "registry" && <FandomRegistry />}
                 </Suspense>
               </motion.div>
             </AnimatePresence>

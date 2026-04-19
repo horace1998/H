@@ -5,13 +5,13 @@
     "terminology": { "homeHeader": "Ritual Sync Center", "taskLabel": "Directives", "galleryLabel": "Synk Oracle", "idLabel": "MY ID", "actionButton": "Manifest" },
     "theme": { "primaryColor": "#AEFF00", "variant": "cyber_operative" },
     "members": [
-      { "id": "karina", "name": "Karina", "role": "Leader/Dancer" },
+      { "id": "karina", "name": "Karina", "role": "Leader" },
       { "id": "giselle", "name": "Giselle", "role": "Rapper" },
       { "id": "winter", "name": "Winter", "role": "Vocalist" },
       { "id": "ningning", "name": "Ningning", "role": "Main Vocalist" }
     ],
     "assets": {
-      "passportProfile": "https://picsum.photos/seed/aespa/600/800",
+      "passportProfile": "https://picsum.photos/seed/aespakarina/600/800",
       "passportTexture": "https://picsum.photos/seed/cyber/800/800?blur=10"
     }
   },
@@ -28,7 +28,7 @@
       { "id": "hyein", "name": "Hyein" }
     ],
     "assets": {
-      "passportProfile": "https://picsum.photos/seed/newjeans/600/800",
+      "passportProfile": "https://picsum.photos/seed/newjeanshanni/600/800",
       "passportTexture": "https://picsum.photos/seed/retro/800/800?blur=10"
     }
   },
@@ -45,7 +45,7 @@
       { "id": "liz", "name": "Liz" },
       { "id": "leeseo", "name": "Leeseo" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/ive/600/800", "passportTexture": "https://picsum.photos/seed/glam/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/ivewonyoung/600/800", "passportTexture": "https://picsum.photos/seed/glam/800/800" }
   },
   {
     "groupId": "lesserafim",
@@ -59,7 +59,7 @@
       { "id": "kazuha", "name": "Kazuha" },
       { "id": "eunchae", "name": "Eunchae" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/lesserafim/600/800", "passportTexture": "https://picsum.photos/seed/iron/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/lesserafimchaewon/600/800", "passportTexture": "https://picsum.photos/seed/iron/800/800" }
   },
   {
     "groupId": "babymonster",
@@ -70,7 +70,7 @@
       { "id": "ruka", "name": "Ruka" }, { "id": "pharita", "name": "Pharita" }, { "id": "asa", "name": "Asa" },
       { "id": "ahyeon", "name": "Ahyeon" }, { "id": "rami", "name": "Rami" }, { "id": "rora", "name": "Rora" }, { "id": "chiquita", "name": "Chiquita" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/babymonster/600/800", "passportTexture": "https://picsum.photos/seed/claw/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/babymonsterahyeon/600/800", "passportTexture": "https://picsum.photos/seed/claw/800/800" }
   },
   {
     "groupId": "straykids",
@@ -81,7 +81,7 @@
       { "id": "bangchan", "name": "Bang Chan", "role": "Leader" }, { "id": "leeknow", "name": "Lee Know" }, { "id": "changbin", "name": "Changbin" },
       { "id": "hyunjin", "name": "Hyunjin" }, { "id": "han", "name": "Han" }, { "id": "felix", "name": "Felix" }, { "id": "seungmin", "name": "Seungmin" }, { "id": "ie", "name": "I.N" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/straykids/600/800", "passportTexture": "https://picsum.photos/seed/city/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/straykidsfelix/600/800", "passportTexture": "https://picsum.photos/seed/city/800/800" }
   },
   {
     "groupId": "bts",
@@ -92,7 +92,7 @@
       { "id": "rm", "name": "RM", "role": "Leader" }, { "id": "jin", "name": "Jin" }, { "id": "suga", "name": "Suga" },
       { "id": "jhope", "name": "j-hope" }, { "id": "jimin", "name": "Jimin" }, { "id": "v", "name": "V" }, { "id": "jungkook", "name": "Jungkook" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/bts/600/800", "passportTexture": "https://picsum.photos/seed/galaxy/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/btsjungkook/600/800", "passportTexture": "https://picsum.photos/seed/galaxy/800/800" }
   },
   {
     "groupId": "nct127",
@@ -100,11 +100,11 @@
     "terminology": { "homeHeader": "Neo City", "taskLabel": "Protocols", "galleryLabel": "Limitless Void", "idLabel": "NEO ID", "actionButton": "Link" },
     "theme": { "primaryColor": "#84CC16", "variant": "neo_neon" },
     "members": [
-      { "id": "taeyong", "name": "Taeyong", "role": "Leader" }, { "id": "taeila", "name": "Taeil" }, { "id": "johnny", "name": "Johnny" },
+      { "id": "johnny", "name": "Johnny" },
       { "id": "yuta", "name": "Yuta" }, { "id": "doyoung", "name": "Doyoung" }, { "id": "jaehyun", "name": "Jaehyun" },
       { "id": "jungwoo", "name": "Jungwoo" }, { "id": "mark", "name": "Mark" }, { "id": "haechan", "name": "Haechan" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/nct127/600/800", "passportTexture": "https://picsum.photos/seed/neocity/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/nct127mark/600/800", "passportTexture": "https://picsum.photos/seed/neocity/800/800" }
   },
   {
     "groupId": "seventeen",
@@ -117,7 +117,7 @@
       { "id": "dk", "name": "DK" }, { "id": "mingyu", "name": "Mingyu" }, { "id": "the8", "name": "The8" }, { "id": "seungkwan", "name": "Seungkwan" },
       { "id": "vernon", "name": "Vernon" }, { "id": "dino", "name": "Dino" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/seventeen/600/800", "passportTexture": "https://picsum.photos/seed/diamond/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/seventeenhoshi/600/800", "passportTexture": "https://picsum.photos/seed/diamond/800/800" }
   },
   {
     "groupId": "twice",
@@ -129,7 +129,7 @@
       { "id": "momo", "name": "Momo" }, { "id": "sana", "name": "Sana" }, { "id": "mina", "name": "Mina" }, { "id": "dahyun", "name": "Dahyun" },
       { "id": "chaeyoung", "name": "Chaeyoung" }, { "id": "tzuyu", "name": "Tzuyu" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/twice/600/800", "passportTexture": "https://picsum.photos/seed/candy/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/twicesana/600/800", "passportTexture": "https://picsum.photos/seed/candy/800/800" }
   },
   {
     "groupId": "blackpink",
@@ -139,7 +139,7 @@
     "members": [
       { "id": "jisoo", "name": "Jisoo" }, { "id": "jennie", "name": "Jennie" }, { "id": "rose", "name": "Rosé" }, { "id": "lisa", "name": "Lisa" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/blackpink/600/800", "passportTexture": "https://picsum.photos/seed/venom/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/blackpinklisa/600/800", "passportTexture": "https://picsum.photos/seed/venom/800/800" }
   },
   {
     "groupId": "riize",
@@ -150,7 +150,7 @@
       { "id": "shotaro", "name": "Shotaro" }, { "id": "eunseok", "name": "Eunseok" }, { "id": "sungchan", "name": "Sungchan" },
       { "id": "wonbin", "name": "Wonbin" }, { "id": "sohee", "name": "Sohee" }, { "id": "anton", "name": "Anton" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/riize/600/800", "passportTexture": "https://picsum.photos/seed/rise/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/riizewonbin/600/800", "passportTexture": "https://picsum.photos/seed/rise/800/800" }
   },
   {
     "groupId": "illit",
@@ -160,7 +160,7 @@
     "members": [
       { "id": "yunah", "name": "Yunah" }, { "id": "minju", "name": "Minju" }, { "id": "moka", "name": "Moka" }, { "id": "wonhee", "name": "Wonhee" }, { "id": "iroha", "name": "Iroha" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/illit/600/800", "passportTexture": "https://picsum.photos/seed/dream/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/illitwonhee/600/800", "passportTexture": "https://picsum.photos/seed/dream/800/800" }
   },
   {
     "groupId": "itzy",
@@ -171,7 +171,7 @@
       { "id": "yeji", "name": "Yeji", "role": "Leader" }, { "id": "lia", "name": "Lia" }, { "id": "ryujin", "name": "Ryujin" },
       { "id": "chaeryeong", "name": "Chaeryeong" }, { "id": "yuna", "name": "Yuna" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/itzy/600/800", "passportTexture": "https://picsum.photos/seed/neon/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/itzyyeji/600/800", "passportTexture": "https://picsum.photos/seed/neon/800/800" }
   },
   {
     "groupId": "redvelvet",
@@ -182,6 +182,6 @@
       { "id": "irene", "name": "Irene", "role": "Leader" }, { "id": "seulgi", "name": "Seulgi" }, { "id": "wendy", "name": "Wendy" },
       { "id": "joy", "name": "Joy" }, { "id": "yeri", "name": "Yeri" }
     ],
-    "assets": { "passportProfile": "https://picsum.photos/seed/redvelvet/600/800", "passportTexture": "https://picsum.photos/seed/cake/800/800" }
+    "assets": { "passportProfile": "https://picsum.photos/seed/redvelvetirene/600/800", "passportTexture": "https://picsum.photos/seed/cake/800/800" }
   }
 ]

@@ -24,9 +24,9 @@ export default function IdentityCard() {
   };
 
   const currentMember = activeConfig.members.find(m => m.id === syncProfileData.linkedMemberId) || activeConfig.members[0];
-  const profileImage = syncProfileData.linkedMemberId 
-    ? `https://picsum.photos/seed/${syncProfileData.linkedMemberId}/600/800`
-    : activeConfig.assets.passportProfile;
+  const profileImage = currentMember?.customImage || (syncProfileData.linkedMemberId 
+    ? `https://picsum.photos/seed/${activeConfig.groupId + syncProfileData.linkedMemberId}/600/800`
+    : (activeConfig.assets.customPassportProfile || activeConfig.assets.passportProfile));
   const [showMotivation, setShowMotivation] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState(customName);

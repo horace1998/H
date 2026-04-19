@@ -94,6 +94,29 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "username"]
+    },
+    "FandomRegistry": {
+      "title": "Fandom Registry",
+      "description": "Configuration and assets for a K-pop group universe.",
+      "type": "object",
+      "properties": {
+        "groupId": { "type": "string" },
+        "meta": {
+          "type": "object",
+          "properties": {
+             "displayName": { "type": "string" },
+             "fandomName": { "type": "string" }
+          }
+        },
+        "terminology": { "type": "object" },
+        "theme": { "type": "object" },
+        "members": { "type": "array" },
+        "assets": { "type": "object" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["groupId", "meta", "terminology", "theme", "members"]
     }
   },
   "firestore": {
@@ -112,6 +135,10 @@
     "/users/{userId}/memories/{memoryId}": {
       "schema": "Memory",
       "description": "Vertical scroll feed collection of user memories."
+    },
+    "/fandom_registry/{groupId}": {
+      "schema": "FandomRegistry",
+      "description": "ReadOnly (Client-side) global fandom configuration registry."
     }
   }
 }

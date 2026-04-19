@@ -148,7 +148,7 @@ export default function RitualDashboard() {
               >
                 <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-50 bg-zinc-100 shrink-0">
                   <img 
-                    src={activeConfig.members.find(m => m.id === bias) ? `https://picsum.photos/seed/${bias}/40/40` : `https://picsum.photos/seed/${activeConfig.groupId}/40/40`} 
+                    src={activeConfig.members.find(m => m.id === bias)?.customImage || (activeConfig.members.find(m => m.id === bias) ? `https://picsum.photos/seed/${activeConfig.groupId + bias}/40/40` : `https://picsum.photos/seed/${activeConfig.groupId}/40/40`)} 
                     className="w-full h-full object-cover" 
                     referrerPolicy="no-referrer" 
                   />
@@ -430,7 +430,7 @@ export default function RitualDashboard() {
                         >
                           <div className="w-16 h-16 rounded-full overflow-hidden shadow-inner border border-zinc-100 transition-transform group-hover:scale-105">
                             <img 
-                              src={`https://picsum.photos/seed/${m.id}/200/200`} 
+                              src={m.customImage || `https://picsum.photos/seed/${activeConfig.groupId + m.id}/400/400`} 
                               className={cn("w-full h-full object-cover transition-all", isSelected ? "" : "grayscale-30")} 
                               referrerPolicy="no-referrer" 
                             />

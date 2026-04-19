@@ -423,7 +423,7 @@ const WelcomeScreen: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =>
                       >
                         <div className="w-10 h-10 rounded-full overflow-hidden border border-black/5 bg-zinc-100 shadow-inner">
                           <img 
-                            src={`https://picsum.photos/seed/${member.id}/100/100`} 
+                            src={member.customImage || `https://picsum.photos/seed/${activeConfig.groupId + member.id}/400/400`} 
                             className={cn("w-full h-full object-cover transition-all duration-500", isSelected ? "" : "grayscale grayscale-50 opacity-60")} 
                             referrerPolicy="no-referrer" 
                           />
