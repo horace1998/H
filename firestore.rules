@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+    function isValidUser(data) {
+      return data.get('uid', '') == request.auth.uid
+        && (data.get('stats', null) == null || (
+          data.stats is map 
+          && (data.stats.get('level', 1) is int)
+          && (data.stats.get('experience', 0) is int)
+          && (data.stats.get('crystals', 0) is int)
+          && (data.stats.get('completed_goals', 0) is int)
+        ))
+        && (data.get('bias', '') is string)
+        && (data.get('syncProfile', null) == null || (
+          data.syncProfile is map
+          && (data.syncProfile.get('linkedGroupId', null) == null || data.syncProfile.linkedGroupId is string)
+          && (data.syncProfile.get('linkedMemberId', null) == null || data.syncProfile.linkedMemberId is string)
+        ))
+        && (data.get('customName', '') is string && data.get('customName', '').size() <= 100)
+        && (data.get('username', '') is string && data.get('username', '').size() <= 32)
+        && (data.get('customPhoto', '') is string && data.get('customPhoto', '').size() <= 1000000)
+        && (data.get('customBackground', '') is string && data.get('customBackground', '').size() <= 1000000)
+        && (data.get('roomAtmosphere', 'Standard') is string)
+        && (data.get('directive', 'Dashboard') is string)
+        && (data.get('frequency', 'Electric') is string);
+    }
+
+    function isValidGoal(data, userId) {
+      return data.uid == userId
+        && data.get('title', '') is string && data.get('title', '').size() <= 200
+        && (data.get('type', 'pulse') in ["pulse", "orbit", "galaxy"])
+        && data.get('completed', false) is bool;
+    }
+
+    function isValidMemory(data, userId) {
+      return data.uid == userId
+        && data.get('media', []) is list
+        && (data.get('authorUsername', '') is string && data.get('authorUsername', '').size() <= 64)
+        && (data.get('authorPhoto', '') is string && data.get('authorPhoto', '').size() <= 2000)
+        && (data.get('caption', '') is string && data.get('caption', '').size() <= 5000)
+        && (data.get('taggedTaskId', '') is string && data.get('taggedTaskId', '').size() <= 128);
+    }
+
+    // --- Collection Routes ---
+
+    match /usernames/{username} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() 
+        && isValidId(username)
+        && incoming().uid == request.auth.uid
+        && (incoming().get('updatedAt', request.time) == request.time);
+      allow delete: if isSignedIn() && existing().uid == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      
+      allow create: if isOwner(userId) 
+        && isValidUser(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isOwner(userId)
+        && isValidUser(incoming())
+        && incoming().updatedAt == request.time
+        && (
+          // Action: Profile Update
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'stats', 'bias', 'syncProfile', 'customName', 'username', 'customPhoto', 'customBackground', 
+            'roomAtmosphere', 'directive', 'frequency', 'updatedAt'
+          ])
+        );
+
+      // Sub-collections
+      match /goals/{goalId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId) && isValidId(goalId);
+        
+        allow create: if isOwner(userId)
+          && isValidGoal(incoming(), userId)
+          && incoming().createdAt == request.time;
+
+        allow update: if isOwner(userId)
+          && isValidGoal(incoming(), userId)
+          && incoming().uid == existing().uid
+          && (
+            // Action: Toggle Completion
+            incoming().diff(existing()).affectedKeys().hasOnly(['completed'])
+          );
+          
+        allow delete: if isOwner(userId);
+      }
+
+      match /memories/{memoryId} {
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId) && isValidId(memoryId);
+        
+        allow create: if isOwner(userId)
+          && isValidMemory(incoming(), userId)
+          && incoming().createdAt == request.time;
+          
+        allow update: if isOwner(userId)
+          && isValidMemory(incoming(), userId)
+          && incoming().uid == existing().uid
+          && incoming().createdAt == existing().createdAt;
+
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
