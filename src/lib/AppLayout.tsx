@@ -14,19 +14,19 @@ const IdentityCard = lazy(() => import("./tabs/IdentityCard"));
 const FandomRegistry = lazy(() => import("./tabs/FandomRegistry"));
 
 const TABS = (t: any, fandom: any) => [
-  { id: "ritual", label: fandom.terminology.homeHeader || t.common.home, subLabel: "SYNK CENTER", icon: Home },
-  { id: "vault", label: fandom.terminology.taskLabel || t.common.directives, subLabel: "COMMANDS", icon: Vault },
-  { id: "oracle", label: fandom.terminology.galleryLabel || t.common.oracle, subLabel: "GALLERY", icon: Gem },
-  { id: "identity", label: t.common.identity, subLabel: "IDENTITY", icon: Fingerprint },
+  { id: "agenda", label: fandom.terminology.homeHeader || t.common.home, subLabel: "AGENDA", icon: Home },
+  { id: "journal", label: fandom.terminology.taskLabel || t.common.directives, subLabel: "JOURNAL", icon: Vault },
+  { id: "proof", label: fandom.terminology.galleryLabel || t.common.oracle, subLabel: "MEDIA", icon: Gem },
+  { id: "identity", label: t.common.identity, subLabel: "PROFILE", icon: Fingerprint },
   { id: "registry", label: "Registry", subLabel: "DATABASE", icon: Database },
 ] as const;
 
-type TabId = "ritual" | "vault" | "oracle" | "identity" | "registry";
+type TabId = "agenda" | "journal" | "proof" | "identity" | "registry";
 
 export default function AppLayout() {
   const { stats, achievement, language } = useSYNK();
   const { activeConfig } = useFandom();
-  const [activeTab, setActiveTab] = useState<TabId>("ritual");
+  const [activeTab, setActiveTab] = useState<TabId>("agenda");
   const [direction, setDirection] = useState(0);
 
   const t = translations[language as Language] || translations.en;
@@ -113,9 +113,9 @@ export default function AppLayout() {
                 className="w-full h-full"
               >
                 <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-xs text-zinc-300 font-medium">Loading...</div>}>
-                  {activeTab === "ritual" && <RitualDashboard />}
-                  {activeTab === "vault" && <GoalVault />}
-                  {activeTab === "oracle" && <SynkOracle />}
+                  {activeTab === "agenda" && <RitualDashboard />}
+                  {activeTab === "journal" && <GoalVault />}
+                  {activeTab === "proof" && <SynkOracle />}
                   {activeTab === "identity" && <IdentityCard />}
                   {activeTab === "registry" && <FandomRegistry />}
                 </Suspense>
@@ -170,7 +170,7 @@ export default function AppLayout() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] text-zinc-500 uppercase font-bold">{t.common.directives} {t.common.done}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold">{t.vault.title} {t.common.done}</span>
                   <span className="text-lg font-bold mt-1">{stats.completed_goals}</span>
                 </div>
               </div>

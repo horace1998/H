@@ -5,6 +5,7 @@ import ThreeBackground from "../ThreeBackground";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "motion/react";
 import { cn } from "../utils";
 import { translations, Language } from "../translations";
+import { Proof, ProofModal } from "../ProofModal";
 import { 
   Notebook, 
   Users, 
@@ -38,7 +39,9 @@ export default function RitualDashboard() {
   const [dateById] = useLocalStorageState<Record<string, string>>("synkify.dateById", {});
   const [scheduleById] = useLocalStorageState<Record<string, string>>("synkify.scheduleById", {});
   const [priorityById] = useLocalStorageState<Record<string, string>>("synkify.priorityById", {});
+  const [proofById, setProofById] = useLocalStorageState<Record<string, Proof>>("synkify.proofById", {});
 
+  const [proofTargetId, setProofTargetId] = useState<string | null>(null);
   const [showDesigner, setShowDesigner] = useState(false);
   const [showFandomModal, setShowFandomModal] = useState(false);
   const [showMemberModal, setShowMemberModal] = useState(false);
@@ -300,13 +303,13 @@ export default function RitualDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
           {/* Minimalist Cards */}
           <div className="minimal-card p-6 flex flex-col gap-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-2">{activeConfig.terminology.taskLabel}</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-2">{t.common.agenda}</h4>
             <div className="flex flex-col gap-2">
               {activeGoals.map(g => (
                 <CompactDirectiveRow 
                   key={g.id} 
                   goal={g} 
-                  onComplete={() => completeGoal(g.id)}
+                  onComplete={() => setProofTargetId(g.id)}
                   scheduledDate={dateById[g.id] || ""}
                   scheduledTime={scheduleById[g.id] || "09:00:00"}
                   t={t}
@@ -379,8 +382,8 @@ export default function RitualDashboard() {
                 <div className="w-full max-w-lg bg-white border border-zinc-200 rounded-[3rem] shadow-2xl p-8 pointer-events-auto flex flex-col gap-8 max-h-[85vh] overflow-y-auto custom-scrollbar">
                   <header className="flex items-center justify-between border-b border-zinc-100 pb-6">
                     <div className="flex flex-col gap-1">
-                      <h1 className="text-2xl font-black tracking-tighter uppercase leading-none">Fandom Protocol</h1>
-                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em]">Calibrate Universe Frequency</p>
+                      <h1 className="text-2xl font-black tracking-tighter uppercase leading-none">Select Fandom</h1>
+                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em]">Active Theme Calibration</p>
                     </div>
                     <button onClick={() => setShowFandomModal(false)} className="w-10 h-10 rounded-full bg-zinc-50 hover:bg-zinc-100 flex items-center justify-center transition-all group">
                       <X className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900" />
@@ -394,7 +397,7 @@ export default function RitualDashboard() {
                         type="text"
                         value={fandomSearch}
                         onChange={(e) => setFandomSearch(e.target.value)}
-                        placeholder="SEARCH FREQUENCY..."
+                        placeholder="SEARCH FANDOMS..."
                         className="w-full bg-zinc-50 border border-transparent focus:border-zinc-100 focus:bg-white rounded-2xl py-4 pl-12 pr-6 text-[11px] uppercase font-bold tracking-widest outline-none transition-all shadow-inner"
                       />
                     </div>
@@ -421,6 +424,19 @@ export default function RitualDashboard() {
                 </div>
               </motion.div>
             </>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {proofTargetId && (
+            <ProofModal
+              onClose={() => setProofTargetId(null)}
+              onSubmit={(proof) => {
+                if (proof) setProofById((prev) => ({ ...prev, [proofTargetId]: proof }));
+                completeGoal(proofTargetId);
+                setProofTargetId(null);
+              }}
+            />
           )}
         </AnimatePresence>
 
@@ -506,9 +522,9 @@ function CompactDirectiveRow({
   };
 
   const goalTypeMeta = {
-    pulse: { label: "PULSE", color: "text-zinc-400 bg-white" },
-    orbit: { label: "ORBIT", color: "text-zinc-600 bg-white" },
-    galaxy: { label: "GALAXY", color: "text-black bg-white" }
+    pulse: { label: "ONE-TIME", color: "text-zinc-400 bg-white" },
+    orbit: { label: "WEEKLY", color: "text-zinc-600 bg-white" },
+    galaxy: { label: "MONTHLY", color: "text-black bg-white" }
   };
 
   return (
@@ -530,7 +546,7 @@ function CompactDirectiveRow({
           "px-1 py-0.5 rounded text-[7px] font-black uppercase tracking-widest shrink-0 border border-zinc-50",
           goalTypeMeta[goal.type as GoalType]?.color
         )}>
-          {goal.type}
+          {goalTypeMeta[goal.type as GoalType]?.label || goal.type}
         </div>
 
         <div className="flex-1 min-w-0">

@@ -258,7 +258,7 @@ export default function IdentityCard() {
                         </div>
                      </div>
                      <div className="flex flex-col">
-                        <span className="text-[11px] uppercase tracking-widest text-zinc-400 mb-2">DIRECTIVES CLOSED</span>
+                        <span className="text-[11px] uppercase tracking-widest text-zinc-400 mb-2">TASKS COMPLETED</span>
                         <div className="flex items-baseline gap-4">
                            <span className="text-5xl font-bold text-zinc-900 leading-none tracking-tighter">{stats.completed_goals}</span>
                            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-300">SUCCESS OPS</span>
@@ -273,7 +273,7 @@ export default function IdentityCard() {
                      <h2 className="text-3xl font-bold uppercase tracking-tighter text-zinc-900">ELITE OPERATIVE</h2>
                   </div>
                   <p className="text-[12px] text-zinc-500 uppercase font-medium tracking-wide leading-relaxed">
-                     Bio-metric verified. Access level 4 identified. Protocol synchronization active.
+                     Bio-metric verified. Access level 4 identified. Task synchronization active.
                   </p>
                </div>
 

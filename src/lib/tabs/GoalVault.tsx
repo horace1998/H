@@ -29,13 +29,9 @@ import {
   Info
 } from "lucide-react";
 import { cn } from "../utils";
+import { Proof, ProofModal } from "../ProofModal";
 
 type Priority = "low" | "medium" | "high";
-type Proof = {
-  kind: "image" | "video";
-  name: string;
-  url: string;
-};
 type ScheduleMap = Record<string, string>;
 type DateMap = Record<string, string>;
 type RecurrenceType = "none" | "weekly" | "monthly";
@@ -457,15 +453,15 @@ function DirectiveCard({
   };
 
   const goalTypeMeta = {
-    pulse: { label: "PULSE", color: "text-zinc-400 bg-white" },
-    orbit: { label: "ORBIT", color: "text-zinc-600 bg-white" },
-    galaxy: { label: "GALAXY", color: "text-black bg-white" }
+    pulse: { label: "ONE-TIME", color: "text-zinc-400 bg-white" },
+    orbit: { label: "WEEKLY", color: "text-zinc-600 bg-white" },
+    galaxy: { label: "MONTHLY", color: "text-black bg-white" }
   };
 
   const priorityMeta = {
-    high: { label: "!", color: "text-red-500" },
-    medium: { label: "•", color: "text-zinc-400" },
-    low: { label: "v", color: "text-zinc-200" }
+    high: { label: "HIGH", color: "text-red-500" },
+    medium: { label: "MEDIUM", color: "text-zinc-400" },
+    low: { label: "LOW", color: "text-zinc-200" }
   };
 
   return (
@@ -487,7 +483,7 @@ function DirectiveCard({
           "px-1 py-0.5 rounded text-[7px] font-black uppercase tracking-widest shrink-0 border border-zinc-50",
           goalTypeMeta[goal.type as GoalType]?.color
         )}>
-          {goal.type}
+          {goalTypeMeta[goal.type as GoalType]?.label || goal.type}
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -617,21 +613,21 @@ function TaskCreateModal({
           <input
             value={draftTaskTitle}
             onChange={(e) => setDraftTaskTitle(e.target.value)}
-            placeholder="Protocol title..."
+            placeholder="Task title..."
             className="w-full bg-zinc-50 border border-zinc-100 px-4 py-3 text-sm text-zinc-900 rounded-xl focus:outline-none"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest px-1">PROTOCOL_TYPE</span>
+              <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest px-1">TASK_TYPE</span>
               <select value={draftTaskType} onChange={(e) => setDraftTaskType(e.target.value as GoalType)} className="bg-zinc-50 border border-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 rounded-xl focus:outline-none">
-                <option value="pulse">pulse // small-scale</option>
-                <option value="orbit">orbit // recurring</option>
-                <option value="galaxy">galaxy // expansion</option>
+                <option value="pulse">One-time</option>
+                <option value="orbit">Weekly</option>
+                <option value="galaxy">Monthly</option>
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest px-1">PRIORITY_LEVEL</span>
+              <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest px-1">PRIORITY</span>
               <select value={draftTaskPriority} onChange={(e) => setDraftTaskPriority(e.target.value as Priority)} className="bg-zinc-50 border border-zinc-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 rounded-xl focus:outline-none">
                 <option value="high">{t.vault.high}</option>
                 <option value="medium">{t.vault.medium}</option>
@@ -672,60 +668,6 @@ function EmptyVault({ t }: { t: any }) {
     </div>
   );
 }
-
-function ProofModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (proof?: Proof) => void }) {
-  const [preview, setPreview] = useState("");
-  const [fileName, setFileName] = useState("");
-  const [kind, setKind] = useState<"image" | "video">("image");
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
-    >
-      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-xl bg-white border border-zinc-200 p-8 rounded-3xl shadow-2xl">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Proof of Sync</p>
-            <h3 className="text-xl font-extrabold tracking-tighter">Attach evidence</h3>
-          </div>
-          <button onClick={onClose} className="text-zinc-300 hover:text-zinc-900"><X className="w-5 h-5" /></button>
-        </div>
-        <label className="block border-2 border-dashed border-zinc-100 rounded-3xl p-10 text-center cursor-pointer hover:bg-zinc-50 transition-all">
-          <input type="file" accept="image/*,video/*" className="hidden" onChange={(e) => {
-              const file = e.target.files?.[0]; if (!file) return;
-              const url = URL.createObjectURL(file); setPreview(url); setFileName(file.name);
-              setKind(file.type.startsWith("video") ? "video" : "image");
-            }} 
-          />
-          <div className="flex flex-col items-center gap-3">
-            <Upload className="w-8 h-8 text-zinc-200" />
-            <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Upload Media</span>
-          </div>
-        </label>
-        {preview && (
-          <div className="mt-6 border border-zinc-100 rounded-2xl overflow-hidden aspect-video">
-            {kind === "image" ? <img src={preview} className="w-full h-full object-cover" /> : <video src={preview} controls className="w-full h-full object-cover" />}
-          </div>
-        )}
-        <div className="mt-8 flex items-center gap-3">
-          <button 
-            onClick={onClose} 
-            className="flex-1 py-4 bg-white border-2 border-zinc-900 text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-50 transition-all active:scale-95"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={() => onSubmit(preview ? { kind, name: fileName, url: preview } : undefined)} 
-            className="flex-1 py-4 bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-zinc-800 transition-all active:scale-95 shadow-lg"
-          >
-            Save Sync
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 
 function formatHour(hour24: number) {
   const suffix = hour24 >= 12 ? "PM" : "AM";

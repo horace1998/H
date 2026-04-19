@@ -845,7 +845,7 @@ export default function SynkOracle() {
                    <label className="text-[10px] text-zinc-400 uppercase tracking-widest block font-bold">TAG DIRECTIVE</label>
                    <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                       {goals.length === 0 ? (
-                        <p className="text-[10px] text-zinc-300 italic">No active directives found.</p>
+                        <p className="text-[10px] text-zinc-300 italic">No active journal entries found.</p>
                       ) : (
                         goals.map(goal => (
                           <button 

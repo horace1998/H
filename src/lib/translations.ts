@@ -5,10 +5,11 @@ export const translations = {
   en: {
     common: {
       home: "HOME",
-      directives: "DIRECTIVES",
-      oracle: "ORACLE",
+      agenda: "AGENDA",
+      directives: "JOURNAL",
+      oracle: "PROOF",
       identity: "IDENTITY",
-      search: "Search directives...",
+      search: "Search journal...",
       loading: "Loading...",
       cancel: "Cancel",
       submit: "Submit",
@@ -37,20 +38,20 @@ export const translations = {
       noMemories: "No neural resonance detected."
     },
     vault: {
-      title: "Directives",
+      title: "Journal",
       calendar: "Calendar",
       agenda: "Agenda",
       performance: "Performance",
       timeline: "Timeline",
-      noDirectives: "No directives scheduled.",
-      addDirective: "New Directive",
+      noDirectives: "No journal entries found.",
+      addDirective: "New Journal Entry",
       priority: "Priority",
       high: "HIGH",
-      medium: "MED",
+      medium: "MEDIUM",
       low: "LOW",
-      complete: "COMPLETE",
-      initiate: "Initiate",
-      swipeHint: "Swipe left to complete"
+      complete: "DONE",
+      initiate: "Create",
+      swipeHint: "Swipe right to complete"
     },
     oracle: {
       title: "Synk Oracle",
@@ -74,10 +75,11 @@ export const translations = {
   ko: {
     common: {
       home: "홈",
-      directives: "지침",
-      oracle: "오라클",
+      agenda: "일정",
+      directives: "저널",
+      oracle: "PROOF",
       identity: "신원",
-      search: "지침 검색 중...",
+      search: "항목 검색 중...",
       loading: "로딩 중...",
       cancel: "취소",
       submit: "제출",
@@ -106,20 +108,20 @@ export const translations = {
       noMemories: "신경 공명이 감지되지 않았습니다."
     },
     vault: {
-      title: "핵심 지침",
+      title: "저널",
       calendar: "달력",
       agenda: "일정",
       performance: "성과",
       timeline: "타임라인",
-      noDirectives: "예정된 지침이 없습니다.",
-      addDirective: "새 지침",
+      noDirectives: "저널 항목이 없습니다.",
+      addDirective: "새 항목",
       priority: "우선순위",
       high: "높음",
       medium: "중간",
       low: "낮음",
-      complete: "동기화 완료",
-      initiate: "수립",
-      swipeHint: "왼쪽으로 밀어서 완료"
+      complete: "완료",
+      initiate: "추가",
+      swipeHint: "오른쪽으로 밀어서 완료"
     },
     oracle: {
       title: "싱크 오라클",
@@ -143,10 +145,11 @@ export const translations = {
   ja: {
     common: {
       home: "ホーム",
-      directives: "ディレクティブ",
-      oracle: "オラクル",
+      agenda: "アジェンダ",
+      directives: "ジャーナル",
+      oracle: "PROOF",
       identity: "アイデンティティ",
-      search: "指令を検索...",
+      search: "項目を検索...",
       loading: "読み込み中...",
       cancel: "キャンセル",
       submit: "送信",
@@ -175,20 +178,20 @@ export const translations = {
       noMemories: "神経共鳴は検出されませんでした。"
     },
     vault: {
-      title: "重要指令",
+      title: "ジャーナル",
       calendar: "カレンダー",
       agenda: "アジェンダ",
       performance: "パフォーマンス",
       timeline: "タイムライン",
-      noDirectives: "予定されている指令はありません。",
-      addDirective: "新規指令",
+      noDirectives: "ジャーナル項目はありません。",
+      addDirective: "新規項目",
       priority: "優先度",
       high: "高",
       medium: "中",
       low: "低",
-      complete: "同期完了",
-      initiate: "開始",
-      swipeHint: "左にスワインで完了"
+      complete: "完了",
+      initiate: "追加",
+      swipeHint: "右にスワイプして完了"
     },
     oracle: {
       title: "シンクオラクル",
@@ -212,10 +215,11 @@ export const translations = {
   zh: {
     common: {
       home: "首页",
-      directives: "核心指令",
-      oracle: "神谕",
+      agenda: "议程",
+      directives: "日志",
+      oracle: "PROOF",
       identity: "身份",
-      search: "搜索指令...",
+      search: "搜索日志...",
       loading: "加载中...",
       cancel: "取消",
       submit: "提交",
@@ -244,20 +248,20 @@ export const translations = {
       noMemories: "未检测到神经共鸣。"
     },
     vault: {
-      title: "核心指令",
+      title: "日志",
       calendar: "日历",
       agenda: "议程",
       performance: "执行状况",
       timeline: "时间线",
-      noDirectives: "无计划指令。",
-      addDirective: "新指令",
+      noDirectives: "无日志条目。",
+      addDirective: "新条目",
       priority: "优先级",
       high: "高",
       medium: "中",
       low: "低",
-      complete: "同步完成",
-      initiate: "启动",
-      swipeHint: "向左滑动完成"
+      complete: "完成",
+      initiate: "添加",
+      swipeHint: "向右滑动完成"
     },
     oracle: {
       title: "同步神谕",
