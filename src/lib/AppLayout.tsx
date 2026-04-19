@@ -48,11 +48,11 @@ export default function AppLayout() {
       <div className="flex w-full h-full max-w-[1440px] mx-auto bg-white border-x border-synk-border overflow-hidden">
         
         {/* Sidebar - Left Navigation */}
-        <aside className="hidden lg:flex w-[240px] flex-col p-6 border-r border-synk-border bg-white flex-shrink-0">
-          <div className="text-2xl font-extrabold tracking-tighter mb-10 text-synk-foreground group">
+        <aside className="hidden lg:flex w-[260px] flex-col pt-7 px-10 pb-10 border-r border-synk-border bg-white flex-shrink-0">
+          <div className="text-4xl font-black tracking-[0.05em] mb-14 text-synk-foreground group select-none">
             <span>SYNK.</span>
           </div>
-          <nav className="flex flex-col gap-5">
+          <nav className="flex flex-col gap-8">
             {currentTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = tab.id === activeTab;
@@ -61,14 +61,21 @@ export default function AppLayout() {
                   key={tab.id}
                   onClick={() => handleNav(tab.id)}
                   className={cn(
-                    "flex items-center gap-3 text-base font-medium transition-all group",
-                    isActive ? "text-black font-bold" : "text-zinc-500 hover:text-black"
+                    "flex items-center gap-5 text-lg font-bold transition-all group relative",
+                    isActive ? "text-black" : "text-zinc-300 hover:text-zinc-500"
                   )}
                 >
-                  {isActive && <div className="nav-dot" style={{ backgroundColor: activeConfig.theme.primaryColor }} />}
-                  {!isActive && <div className="w-2" />}
-                  <Icon className={cn("w-5 h-5", isActive ? "text-black" : "text-zinc-400")} />
-                  {tab.label}
+                  <Icon className={cn("w-6 h-6 transition-transform group-hover:scale-110", isActive ? "text-black stroke-[2.5px]" : "text-zinc-300 stroke-2")} />
+                  <div className="flex flex-col items-start leading-none">
+                    <span className="text-[14px] uppercase tracking-tighter font-black">{tab.label}</span>
+                    <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-zinc-300 group-hover:text-zinc-400 transition-colors mt-1">{tab.subLabel}</span>
+                  </div>
+                  {isActive && (
+                    <motion.div 
+                      layoutId="sidebarActive"
+                      className="absolute -left-6 w-1.5 h-6 bg-black rounded-r-full"
+                    />
+                  )}
                 </button>
               );
             })}
@@ -78,8 +85,8 @@ export default function AppLayout() {
         {/* Main Feed Content - Center */}
         <main className="flex-1 flex flex-col min-w-0 bg-white">
           {/* Mobile Header */}
-          <header className="lg:hidden h-16 flex items-center justify-between px-6 border-b border-synk-border flex-shrink-0">
-            <div className="text-xl font-bold tracking-tighter text-synk-foreground">SYNK.</div>
+          <header className="lg:hidden h-20 flex items-center justify-between px-8 border-b border-synk-border flex-shrink-0">
+            <div className="text-3xl font-black tracking-tighter text-synk-foreground">SYNK.</div>
             <div className="flex items-center gap-2 px-3 py-1 bg-zinc-100 rounded-full text-xs font-bold">
               <Zap className="w-3 h-3 text-black" />
               {stats.crystals}
@@ -124,7 +131,7 @@ export default function AppLayout() {
           </div>
 
           {/* Mobile Tab Bar */}
-          <nav className="lg:hidden h-16 border-t border-synk-border flex items-center justify-around px-2 flex-shrink-0">
+          <nav className="lg:hidden h-24 border-t border-synk-border flex items-center justify-around px-6 pb-safe flex-shrink-0 bg-white/80 backdrop-blur-md">
             {currentTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = tab.id === activeTab;
@@ -132,9 +139,21 @@ export default function AppLayout() {
                 <button
                   key={tab.id}
                   onClick={() => handleNav(tab.id)}
-                  className={isActive ? "text-black" : "text-zinc-400"}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center w-16 h-full transition-all active:scale-90",
+                    isActive ? "text-black" : "text-zinc-200 hover:text-zinc-400"
+                  )}
                 >
-                  <Icon className="w-6 h-6" />
+                  <Icon className={cn("w-7 h-7 mb-1", isActive ? "stroke-2.5" : "stroke-2")} />
+                  <span className={cn("text-[8px] font-black uppercase tracking-widest", isActive ? "opacity-100" : "opacity-0")}>
+                    {tab.subLabel}
+                  </span>
+                  {isActive && (
+                    <motion.div 
+                      layoutId="activeTabDot"
+                      className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-black"
+                    />
+                  )}
                 </button>
               );
             })}
