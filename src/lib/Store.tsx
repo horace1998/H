@@ -24,6 +24,11 @@ export interface UserStats {
   experience: number;
   crystals: number;
   completed_goals: number;
+  currentStreak: number;
+  activeMultiplier: number;
+  totalPoints: number;
+  streakShieldCount: number;
+  lastSessionDate?: string;
 }
 
 export interface Decoration {
@@ -97,6 +102,7 @@ interface SYNKContextType {
   setLanguage: (lang: string) => void;
   syncProfileData: SyncProfile;
   setSyncProfileData: (data: Partial<SyncProfile>) => Promise<void>;
+  completeFocusSession: (minutes: number) => Promise<void>;
 }
 
 const SYNKContext = createContext<SYNKContextType | undefined>(undefined);
@@ -110,6 +116,10 @@ export function SYNKProvider({ children }: { children: ReactNode }) {
     experience: 0,
     crystals: 10,
     completed_goals: 0,
+    currentStreak: 0,
+    activeMultiplier: 1,
+    totalPoints: 0,
+    streakShieldCount: 0,
   });
 
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -197,7 +207,18 @@ export function SYNKProvider({ children }: { children: ReactNode }) {
       console.log("SYNK_FIRESTORE: User document update received.");
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setStats(data.stats || stats);
+        const incomingStats = data.stats || {};
+        setStats({
+          level: incomingStats.level ?? 1,
+          experience: incomingStats.experience ?? 0,
+          crystals: incomingStats.crystals ?? 10,
+          completed_goals: incomingStats.completed_goals ?? 0,
+          currentStreak: incomingStats.currentStreak ?? 0,
+          activeMultiplier: incomingStats.activeMultiplier ?? 1.0,
+          totalPoints: incomingStats.totalPoints ?? 0,
+          streakShieldCount: incomingStats.streakShieldCount ?? 0,
+          lastSessionDate: incomingStats.lastSessionDate
+        } as UserStats);
         setBias(data.bias || 'None');
         
         // Dynamic Sync Profile
@@ -398,6 +419,85 @@ export function SYNKProvider({ children }: { children: ReactNode }) {
 
   const hideAchievement = () => setAchievement(prev => ({...prev, show: false}));
 
+  const calculateMultiplier = (streak: number) => {
+    if (streak <= 2) return 1.0;
+    if (streak <= 6) return 1.2;
+    if (streak <= 13) return 1.5;
+    if (streak <= 20) return 1.8;
+    if (streak <= 27) return 2.1;
+    return 2.5; 
+  };
+
+  const completeFocusSession = async (minutes: number) => {
+    if (!user) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const currentStats = { ...stats };
+    let newStreak = (currentStats as any).currentStreak || 0;
+    let newShields = (currentStats as any).streakShieldCount || 0;
+
+    if (currentStats.lastSessionDate !== todayStr) {
+      if (currentStats.lastSessionDate === yesterdayStr) {
+        newStreak += 1;
+      } else if (!currentStats.lastSessionDate) {
+        newStreak = 1;
+      } else {
+        const lastDate = new Date(currentStats.lastSessionDate);
+        const diffTime = Math.abs(today.getTime() - lastDate.getTime());
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const missedDays = diffDays - 1;
+
+        if (missedDays > 0 && newShields >= missedDays) {
+          newShields -= missedDays;
+          newStreak += 1;
+        } else {
+          newStreak = 1;
+        }
+      }
+    }
+
+    const newMultiplier = calculateMultiplier(newStreak);
+    const baseExp = minutes * 2;
+    const basePoints = minutes * 10;
+    const earnedPoints = Math.floor(basePoints * newMultiplier);
+    const earnedExp = Math.floor(baseExp * newMultiplier);
+
+    const newExp = currentStats.experience + earnedExp;
+    const newLevel = Math.floor(newExp / 200) + 1;
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const updatedStats = {
+        ...currentStats,
+        experience: newExp,
+        level: newLevel,
+        currentStreak: newStreak,
+        activeMultiplier: newMultiplier,
+        totalPoints: ((currentStats as any).totalPoints || 0) + earnedPoints,
+        streakShieldCount: newShields,
+        lastSessionDate: todayStr
+      };
+
+      await updateDoc(userRef, {
+        stats: updatedStats,
+        updatedAt: serverTimestamp()
+      });
+
+      if (newLevel > currentStats.level) {
+        triggerAchievement("境界突破", `已達到共鳴等級 ${newLevel}`);
+      } else {
+        triggerAchievement("同步成功", `+${earnedPoints} 點數 | ${newMultiplier}x 加成`);
+      }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${user.uid}`);
+    }
+  };
+
   const addDecoration = (image: string, type: 'image' | 'crystal' | 'orb') => {
     const newDeco: Decoration = {
       id: Math.random().toString(),
@@ -490,7 +590,8 @@ export function SYNKProvider({ children }: { children: ReactNode }) {
       language,
       setLanguage: setLanguageState,
       syncProfileData,
-      setSyncProfileData
+      setSyncProfileData,
+      completeFocusSession
     }}>
       {children}
     </SYNKContext.Provider>

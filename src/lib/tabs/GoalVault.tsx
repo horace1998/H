@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useSYNK, GoalType, Goal } from "../Store";
 import { useFandom } from "../FandomContext";
+import { useLocalStorageState } from "../hooks";
 import { motion, AnimatePresence } from "motion/react";
 import { useMotionValue, useTransform } from "motion/react";
 import { translations, Language } from "../translations";
@@ -37,20 +38,7 @@ type DateMap = Record<string, string>;
 type RecurrenceType = "none" | "weekly" | "monthly";
 type RecurrenceMap = Record<string, { type: RecurrenceType; days: number[] }>;
 
-function useLocalStorageState<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : initial;
-    } catch {
-      return initial;
-    }
-  });
-  React.useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-  return [value, setValue] as const;
-}
+// Removed locally defined useLocalStorageState to use shared version from ../hooks
 
 export default function GoalVault() {
   const { goals, addGoal, completeGoal, deleteGoal, language } = useSYNK();

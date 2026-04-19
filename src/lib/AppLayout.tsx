@@ -2,12 +2,13 @@ import { useSYNK } from "./Store";
 import { useFandom } from "./FandomContext";
 import { motion, AnimatePresence } from "motion/react";
 import { lazy, Suspense, useState } from "react";
-import { Home, Vault, Zap, Fingerprint, Gem, Database } from "lucide-react";
+import { Home, Vault, Zap, Fingerprint, Gem, Database, Timer } from "lucide-react";
 import { cn } from "./utils";
 import { translations, Language } from "./translations";
 
 // Lazy load tabs
 const RitualDashboard = lazy(() => import("./tabs/RitualDashboard"));
+const FocusTimer = lazy(() => import("./tabs/FocusTimer"));
 const GoalVault = lazy(() => import("./tabs/GoalVault"));
 const SynkOracle = lazy(() => import("./tabs/SynkOracle"));
 const IdentityCard = lazy(() => import("./tabs/IdentityCard"));
@@ -15,13 +16,14 @@ const FandomRegistry = lazy(() => import("./tabs/FandomRegistry"));
 
 const TABS = (t: any, fandom: any) => [
   { id: "agenda", label: fandom.terminology.homeHeader || t.common.home, subLabel: "AGENDA", icon: Home },
+  { id: "focus", label: "Focus", subLabel: "RESONANCE", icon: Timer },
   { id: "journal", label: fandom.terminology.taskLabel || t.common.directives, subLabel: "JOURNAL", icon: Vault },
   { id: "proof", label: fandom.terminology.galleryLabel || t.common.oracle, subLabel: "MEDIA", icon: Gem },
   { id: "identity", label: t.common.identity, subLabel: "PROFILE", icon: Fingerprint },
   { id: "registry", label: "Registry", subLabel: "DATABASE", icon: Database },
 ] as const;
 
-type TabId = "agenda" | "journal" | "proof" | "identity" | "registry";
+type TabId = "agenda" | "focus" | "journal" | "proof" | "identity" | "registry";
 
 export default function AppLayout() {
   const { stats, achievement, language } = useSYNK();
@@ -121,6 +123,7 @@ export default function AppLayout() {
               >
                 <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-xs text-zinc-300 font-medium">Loading...</div>}>
                   {activeTab === "agenda" && <RitualDashboard />}
+                  {activeTab === "focus" && <FocusTimer />}
                   {activeTab === "journal" && <GoalVault />}
                   {activeTab === "proof" && <SynkOracle />}
                   {activeTab === "identity" && <IdentityCard />}

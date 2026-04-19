@@ -16,9 +16,14 @@
             "level": { "type": "integer" },
             "experience": { "type": "integer" },
             "crystals": { "type": "integer" },
-            "completed_goals": { "type": "integer" }
+            "completed_goals": { "type": "integer" },
+            "currentStreak": { "type": "integer", "description": "Current consecutive days of activity." },
+            "activeMultiplier": { "type": "number", "description": "XP/Points multiplier based on streak." },
+            "totalPoints": { "type": "integer", "description": "Total resonance points earned." },
+            "streakShieldCount": { "type": "integer", "description": "Number of shields to prevent streak reset." },
+            "lastSessionDate": { "type": "string", "description": "ISO date string of the last focus session." }
           },
-          "required": ["level", "experience", "crystals", "completed_goals"]
+          "required": ["level", "experience", "crystals", "completed_goals", "currentStreak", "activeMultiplier", "totalPoints", "streakShieldCount"]
         },
         "bias": { "type": "string" },
         "syncProfile": {

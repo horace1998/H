@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSYNK, Memory, Goal, GoalType } from "../Store";
 import { useFandom } from "../FandomContext";
+import { useLocalStorageState } from "../hooks";
 import ThreeBackground from "../ThreeBackground";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "motion/react";
 import { cn } from "../utils";
@@ -590,16 +591,5 @@ function CompactDirectiveRow({
   );
 }
 
-function useLocalStorageState<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : initial;
-    } catch { return initial; }
-  });
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-  return [value, setValue] as const;
-}
+// Removed locally defined useLocalStorageState to use shared version from ../hooks
 
